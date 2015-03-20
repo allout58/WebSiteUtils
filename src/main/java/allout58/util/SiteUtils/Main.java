@@ -5,14 +5,19 @@ import allout58.util.SiteUtils.api.ModuleManager;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 public class Main
 {
+    private static Logger logger = LogManager.getLogger("Main");
+
     public static void main(String[] args) throws Exception
     {
+        logger.info("Hello world. Here we go!");
         if (args.length == 0)
         {
             System.out.println("Modules:");
@@ -25,11 +30,11 @@ public class Main
             OptionSpec helpOpt = parser.acceptsAll(Arrays.asList("?", "h", "help"), "show module specific options").forHelp();
             parser.accepts("site", "Site to work with.").withRequiredArg().ofType(String.class);
 
-            if (args[0].equalsIgnoreCase("?") || args[0].equalsIgnoreCase("h") || args[0].equalsIgnoreCase("help"))
+            if ("?".equalsIgnoreCase(args[0]) || "h".equalsIgnoreCase(args[0]) || "help".equalsIgnoreCase(args[0]))
             {
                 doHelp(parser);
             }
-            else if (args[0].equalsIgnoreCase("list"))
+            else if ("list".equalsIgnoreCase(args[0]))
             {
                 System.out.println("Modules:");
                 for (String n : ModuleManager.getInstance().getAllNames())
@@ -39,14 +44,11 @@ public class Main
             {
                 IModule module = ModuleManager.getInstance().getModuleByName(args[0]);
                 if (module == null)
-                {
-                    System.err.println("Error finding module " + args[0]);
-                }
+                    logger.error("Error finding module " + args[0]);
                 else
                 {
                     module.addOptionAcceptors(parser);
                     OptionSet options = parser.parse(Arrays.copyOfRange(args, 1, args.length));
-
                     if (options.has(helpOpt))
                     {
                         doHelp(parser);
@@ -55,7 +57,6 @@ public class Main
                     {
                         module.parseOptions(options);
                     }
-
                 }
             }
         }

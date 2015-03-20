@@ -4,6 +4,8 @@ import allout58.util.SiteUtils.api.IModule;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,7 +13,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import javax.swing.*;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -25,15 +29,7 @@ import java.util.List;
  * Created by James Hollowell on 3/16/2015.
  */
 public class BrokenLinksModule implements IModule
-{
-    private List<String> visitedPages = new ArrayList<>();
-    private List<BrokenLink> brokenLinks = new ArrayList<>();
-    private LinkedList<Link> pageQueue = new LinkedList<>();
-    private String root;
-    private boolean followRedirect = false;
-    private boolean doImages = false;
-
-    /*
+{    /*
      * Taken from org.jsoup.helper.HttpConnection.Response
      *
      * For example {@code application/atom+xml;charset=utf-8}.
@@ -43,6 +39,14 @@ public class BrokenLinksModule implements IModule
     //private static final Pattern xmlContentTypeRxp = Pattern.compile("application/\\w+\\+xml.*");
     private static final String[] blockedExtensions = new String[] { ".pdf", ".json", ".jpg", ".gif", ".doc", ".docx", ".ppt", ".pptx" };
     private static final String userAgent = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"; //Chrome
+    private static final Logger logger = LogManager.getLogger("BrokenLinksModule");
+
+    private List<String> visitedPages = new ArrayList<>();
+    private List<BrokenLink> brokenLinks = new ArrayList<>();
+    private LinkedList<Link> pageQueue = new LinkedList<>();
+    private String root;
+    private boolean followRedirect = false;
+    private boolean doImages = false;
 
     private OptionSpec followRedirectOpt;
     private OptionSpec<File> siteMapOutOpt;
@@ -84,13 +88,29 @@ public class BrokenLinksModule implements IModule
             for (BrokenLink b : brokenLinks)
                 System.out.println(b);
 
-            System.out.println("======Statistics:======");
-            System.out.println(String.format("%-30s:%5d", "Number of Visited Pages", visitedPages.size()));
-            System.out.println(String.format("%-30s:%5.2f", "Total Time", ((double) (timeEnd - timeStart)) / 1000000000.0));
+            if (optionSet.has(siteMapOutOpt))
+            {
+                try
+                {
+                    File out = optionSet.valueOf(siteMapOutOpt);
+                    if (!out.exists() && !out.createNewFile())
+                        logger.error("Error creating file.");
+                    BufferedWriter bw = new BufferedWriter(new FileWriter(out));
+                    for (String map : visitedPages)
+                    {
+                        bw.write(map);
+                        bw.newLine();
+                    }
+                }
+                catch (IOException e)
+                {
+                    logger.error("Error writing sitemap to file", e);
+                }
+            }
 
-            //            System.out.println("Pages looked at:");
-            //            for (String s : visitedPages)
-            //                System.out.println(s);
+            System.out.println("======Statistics:======");
+            System.out.println(String.format("%-30s:%10d", "Number of Visited Pages", visitedPages.size()));
+            System.out.println(String.format("%-30s:%10.2f", "Total Time", ((double) (timeEnd - timeStart)) / 1000000000.0));
         }
         catch (MalformedURLException mue)
         {
@@ -178,7 +198,7 @@ public class BrokenLinksModule implements IModule
                     }
                     else
                     {
-                        brokenLinks.add(new BrokenLink(link.getUrl(), (link.getContext() == null ? "" : link.getContext().outerHtml()), (link.getContext() == null ? "" : link.getContext().baseUri()), statusCode));
+                        brokenLinks.add(new BrokenLink(link.getUrl(), link.getContext() == null ? "" : link.getContext().outerHtml(), link.getContext() == null ? "" : link.getContext().baseUri(), statusCode));
                     }
 
                 }
@@ -244,8 +264,8 @@ public class BrokenLinksModule implements IModule
             return "BrokenLink{" +
                     "page='" + page + '\'' +
                     ", referringContext='" + referringContext + '\'' +
-                    ", statusCode=" + statusCode +
                     ", referringPage='" + referringPage + '\'' +
+                    ", statusCode=" + statusCode +
                     '}';
         }
     }

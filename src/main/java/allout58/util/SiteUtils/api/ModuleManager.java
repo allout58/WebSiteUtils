@@ -14,17 +14,17 @@ public class ModuleManager
 
     private Map<String, IModule> moduleMap;
 
+    protected ModuleManager()
+    {
+        moduleMap = new HashMap<>();
+        registerBuiltin();
+    }
+
     public static ModuleManager getInstance()
     {
         if (instance == null)
             instance = new ModuleManager();
         return instance;
-    }
-
-    protected ModuleManager()
-    {
-        moduleMap = new HashMap<>();
-        registerBuiltin();
     }
 
     /**
