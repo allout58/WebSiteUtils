@@ -1,6 +1,7 @@
 package allout58.util.SiteUtils.api;
 
 import allout58.util.SiteUtils.builtin.BrokenLinksModule;
+import allout58.util.SiteUtils.builtin.UnusedCSSModule;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,5 +73,6 @@ public class ModuleManager
     protected void registerBuiltin()
     {
         registerModule("BrokenLinks", new BrokenLinksModule());
+        registerModule("UnusedCSS", new UnusedCSSModule());
     }
 }
