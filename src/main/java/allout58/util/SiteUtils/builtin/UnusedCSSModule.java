@@ -3,9 +3,11 @@ package allout58.util.SiteUtils.builtin;
 import allout58.util.SiteUtils.api.IModule;
 import com.helger.commons.charset.CCharset;
 import com.helger.css.ECSSVersion;
+import com.helger.css.decl.CSSSelector;
 import com.helger.css.decl.CSSStyleRule;
 import com.helger.css.decl.CascadingStyleSheet;
 import com.helger.css.reader.CSSReader;
+import com.helger.css.writer.CSSWriterSettings;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -67,6 +69,11 @@ public class UnusedCSSModule implements IModule
         if (readSitemap() && readCSS())
         {
             System.out.println("Continue");
+            String loc;
+            while ((loc = siteMap.poll()) != null)
+            {
+
+            }
         }
     }
 
@@ -119,24 +126,6 @@ public class UnusedCSSModule implements IModule
                     styles += line + System.getProperty("line.separator");
                 }
                 cascadingStyleSheet = CSSReader.readFromString(styles, ECSSVersion.CSS30);
-                //                URLConnection con = url.openConnection();
-                //                cascadingStyleSheet = CSSReader.readFromStream(new IInputStreamProvider()
-                //                {
-                //                    @Nullable
-                //                    @Override
-                //                    public InputStream getInputStream()
-                //                    {
-                //                        try
-                //                        {
-                //                            return con.getInputStream();
-                //                        }
-                //                        catch (IOException e)
-                //                        {
-                //                            logger.error("Error reading remote CSS file.");
-                //                            return null;
-                //                        }
-                //                    }
-                //                }, CCharset.CHARSET_UTF_8_OBJ, ECSSVersion.CSS30);
             }
             if (cascadingStyleSheet == null)
             {
@@ -145,9 +134,15 @@ public class UnusedCSSModule implements IModule
             }
             for (CSSStyleRule rule : cascadingStyleSheet.getAllStyleRules())
             {
-                System.out.println(rule);
+                for (CSSSelector val : rule.getAllSelectors())
+                {
+                    cssSelectors.add(val.getAsCSSString(new CSSWriterSettings(ECSSVersion.CSS30), 0));
+                    System.out.println(val.getAsCSSString(new CSSWriterSettings(ECSSVersion.CSS30), 0));
+                }
             }
+            System.out.println("Total number of CSS style Selectors: " + cssSelectors.size());
         }
+
         catch (IOException e)
         {
             logger.error("Error reading the CSS file.", e);

@@ -2,6 +2,7 @@ apply plugin: 'java'
 apply plugin: 'checkstyle'
 //apply plugin: 'findbugs'
 apply plugin: 'idea'
+apply plugin: 'application'
 //apply plugin: 'launch4j'
 
 buildscript {
@@ -17,6 +18,10 @@ boolean fullbuild = true
 
 version = '1.0.0-a1'
 group = "allout58.util.SiteUtils"
+
+mainClassName = "allout58.util.SiteUtils.Main"
+
+distZip.dependsOn(build)
 
 if (System.getenv().DRONE_BUILD_NUMBER) {
     version += "-droneio" + System.getenv().DRONE_BUILD_NUMBER
@@ -50,6 +55,7 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.0.1'
     compile 'org.jsoup:jsoup:1.8.1'
     compile 'com.helger:ph-css:3.9.1'
+    runtime fileTree(dir: 'libs', include: '*.jar')
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
 
