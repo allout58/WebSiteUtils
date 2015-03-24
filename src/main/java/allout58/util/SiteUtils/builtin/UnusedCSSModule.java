@@ -1,5 +1,6 @@
 package allout58.util.SiteUtils.builtin;
 
+import allout58.util.SiteUtils.Utils;
 import allout58.util.SiteUtils.api.IModule;
 import com.helger.commons.charset.CCharset;
 import com.helger.css.ECSSVersion;
@@ -13,6 +14,9 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -23,8 +27,10 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -38,6 +44,7 @@ public class UnusedCSSModule implements IModule
     private String cssFile;
     private Queue<String> siteMap = new LinkedList<>();
     private List<String> cssSelectors = new ArrayList<>();
+    private Map<String, Integer> selectorUsage = new HashMap<>();
 
     private OptionSpec<File> sitemapOpt;
     private OptionSpec<String> cssOpt;
@@ -72,7 +79,30 @@ public class UnusedCSSModule implements IModule
             String loc;
             while ((loc = siteMap.poll()) != null)
             {
+                try
+                {
+                    Connection connect = Jsoup.connect(loc)
+                            .userAgent(Utils.chromeUA)
+                            .timeout(3000);
+                    connect.execute();
+                    Document document = connect.get();
+                    for (String sel : cssSelectors)
+                    {
 
+                        int currentCount = selectorUsage.getOrDefault(sel, 0);
+                        if (document.select(sel).size() > 0)
+                            selectorUsage.put(sel, currentCount + 1);
+                    }
+                }
+                catch (IOException e)
+                {
+                    logger.error(e);
+                }
+            }
+
+            for (Map.Entry<String, Integer> entry : selectorUsage.entrySet())
+            {
+                System.out.println(entry.getKey() + " - " + entry.getValue());
             }
         }
     }
@@ -136,11 +166,15 @@ public class UnusedCSSModule implements IModule
             {
                 for (CSSSelector val : rule.getAllSelectors())
                 {
-                    cssSelectors.add(val.getAsCSSString(new CSSWriterSettings(ECSSVersion.CSS30), 0));
-                    System.out.println(val.getAsCSSString(new CSSWriterSettings(ECSSVersion.CSS30), 0));
+                    String style = Utils.stripCssStates(val.getAsCSSString(new CSSWriterSettings(ECSSVersion.CSS30), 0));
+                    if (!cssSelectors.contains(style))
+                    {
+                        cssSelectors.add(style);
+                        System.out.println(style);
+                    }
                 }
             }
-            System.out.println("Total number of CSS style Selectors: " + cssSelectors.size());
+            System.out.println("Total number of CSS style Selectors (ignoring hoverstates): " + cssSelectors.size());
         }
 
         catch (IOException e)

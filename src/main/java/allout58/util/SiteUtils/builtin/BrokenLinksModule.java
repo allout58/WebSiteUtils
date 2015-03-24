@@ -1,5 +1,6 @@
 package allout58.util.SiteUtils.builtin;
 
+import allout58.util.SiteUtils.Utils;
 import allout58.util.SiteUtils.api.IModule;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -37,8 +38,7 @@ public class BrokenLinksModule implements IModule
      * characters up to a {@code "+xml"}, and then maybe more ({@code .*}).
      */
     //private static final Pattern xmlContentTypeRxp = Pattern.compile("application/\\w+\\+xml.*");
-    private static final String[] blockedExtensions = new String[] { ".pdf", ".json", ".jpg", ".gif", ".doc", ".docx", ".ppt", ".pptx" };
-    private static final String userAgent = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"; //Chrome
+    private static final String[] blockedExtensions = new String[] { ".pdf", ".json", ".jpg", ".gif", ".png", ".doc", ".docx", ".ppt", ".pptx" };
     private static final Logger logger = LogManager.getLogger("BrokenLinksModule");
 
     private List<String> visitedPages = new ArrayList<>();
@@ -152,7 +152,7 @@ public class BrokenLinksModule implements IModule
                         if (validEnding)
                         {
                             Connection connect = Jsoup.connect(link.getUrl())
-                                    .userAgent(userAgent)
+                                    .userAgent(Utils.chromeUA)
                                     .timeout(3000);
                             connect.execute();
                             Document document = connect.get();
@@ -215,7 +215,7 @@ public class BrokenLinksModule implements IModule
     {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestMethod("HEAD");
-        urlConnection.setRequestProperty("User-Agent", userAgent);
+        urlConnection.setRequestProperty("User-Agent", Utils.chromeUA);
         urlConnection.setInstanceFollowRedirects(followRedirect);
         urlConnection.connect();
         return urlConnection.getResponseCode();
