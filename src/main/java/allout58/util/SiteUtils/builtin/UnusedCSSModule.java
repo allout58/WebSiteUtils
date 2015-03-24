@@ -17,6 +17,8 @@ import org.apache.logging.log4j.Logger;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -28,6 +30,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +78,7 @@ public class UnusedCSSModule implements IModule
     {
         if (readSitemap() && readCSS())
         {
-            System.out.println("Continue");
+            System.out.println("Checking pages");
             String loc;
             while ((loc = siteMap.poll()) != null)
             {
@@ -86,13 +89,20 @@ public class UnusedCSSModule implements IModule
                             .timeout(3000);
                     connect.execute();
                     Document document = connect.get();
-                    for (String sel : cssSelectors)
+                    Elements elements = document.select("link[rel=\"stylesheet\"]");
+                    boolean hasThisStylesheet = false;
+                    String stylesheetFile = cssFile.substring(cssFile.lastIndexOf("/") + 1);
+                    Iterator<Element> elementIterator = elements.iterator();
+                    while (elementIterator.hasNext() && !hasThisStylesheet)
                     {
-
-                        int currentCount = selectorUsage.getOrDefault(sel, 0);
-                        if (document.select(sel).size() > 0)
-                            selectorUsage.put(sel, currentCount + 1);
+                        hasThisStylesheet |= elementIterator.next().attr("href").contains(stylesheetFile);
                     }
+                    if (hasThisStylesheet)
+                        for (String sel : cssSelectors)
+                        {
+                            int currentCount = selectorUsage.getOrDefault(sel, 0);
+                            selectorUsage.put(sel, document.select(sel).size() > 0 ? currentCount + 1 : currentCount);
+                        }
                 }
                 catch (IOException e)
                 {
@@ -120,7 +130,11 @@ public class UnusedCSSModule implements IModule
             String line;
             while ((line = br.readLine()) != null)
             {
-                siteMap.add(line);
+                boolean validEnding = true;
+                for (String ending : Utils.blockedExtensions)
+                    validEnding &= !line.endsWith(ending);
+                if (validEnding)
+                    siteMap.add(line);
             }
         }
         catch (IOException e)

@@ -38,7 +38,6 @@ public class BrokenLinksModule implements IModule
      * characters up to a {@code "+xml"}, and then maybe more ({@code .*}).
      */
     //private static final Pattern xmlContentTypeRxp = Pattern.compile("application/\\w+\\+xml.*");
-    private static final String[] blockedExtensions = new String[] { ".pdf", ".json", ".jpg", ".gif", ".png", ".doc", ".docx", ".ppt", ".pptx" };
     private static final Logger logger = LogManager.getLogger("BrokenLinksModule");
 
     private List<String> visitedPages = new ArrayList<>();
@@ -145,7 +144,7 @@ public class BrokenLinksModule implements IModule
                         System.out.println("Current number of visited pages: " + visitedPages.size());
                     int statusCode = pingAddr(new URL(link.getUrl()));
                     boolean validEnding = true;
-                    for (String ending : blockedExtensions)
+                    for (String ending : Utils.blockedExtensions)
                         validEnding &= !link.getUrl().endsWith(ending);
                     if (statusCode == 200)
                     {
@@ -161,10 +160,10 @@ public class BrokenLinksModule implements IModule
                             {
                                 String href = el.attr("href");
                                 //Ignore get parameters
-                                if (href.contains("?"))
+                                /*if (href.contains("?"))
                                 {
                                     href = href.substring(0, href.indexOf("?"));
-                                }
+                                }*/
                                 //Ignore id links
                                 if (href.contains("#"))
                                 {
