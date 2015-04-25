@@ -17,7 +17,7 @@
     </Appenders>
     <Loggers>
         <Root level="all">
-            <AppenderRef ref="SysOut" level="INFO"/>
+            <!--<AppenderRef ref="SysOut" level="INFO"/>-->
             <AppenderRef ref="File"/>
         </Root>
     </Loggers>

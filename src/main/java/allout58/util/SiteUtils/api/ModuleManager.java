@@ -1,7 +1,7 @@
 package allout58.util.SiteUtils.api;
 
-import allout58.util.SiteUtils.builtin.BrokenLinksModule;
 import allout58.util.SiteUtils.builtin.UnusedCSSModule;
+import allout58.util.SiteUtils.builtin.brokenlinks.BrokenLinksModule;
 
 import java.util.HashMap;
 import java.util.Map;

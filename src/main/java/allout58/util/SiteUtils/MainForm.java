@@ -1,5 +1,8 @@
 package allout58.util.SiteUtils;
 
+import allout58.util.SiteUtils.api.IModule;
+import allout58.util.SiteUtils.api.ModuleManager;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -15,8 +18,13 @@ public class MainForm extends JFrame
         super("Site Utilities");
         this.add(main);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        JToolBar mainToolbar = new JToolBar();
-        //mainToolbar.add()
-        //main.add();
+        String name = "";
+        IModule module = null;
+        while ((module = ModuleManager.getInstance().getModuleByName(name)) == null)
+            name = JOptionPane.showInputDialog(this, "Name of module to load");
+
+        main.add(module.getPanel(), BorderLayout.EAST);
+
+        add(main);
     }
 }

@@ -1,4 +1,4 @@
-package allout58.util.SiteUtils.builtin;
+package allout58.util.SiteUtils.builtin.brokenlinks;
 
 import allout58.util.SiteUtils.Utils;
 import allout58.util.SiteUtils.api.IModule;
@@ -14,6 +14,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -54,7 +55,15 @@ public class BrokenLinksModule implements IModule
     @Override
     public JPanel getPanel()
     {
-        return null;
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
+
+        JPanel optionsPanel = new JPanel(new GridBagLayout());
+
+        JTable results = new JTable(new ResultsTableModel(brokenLinks));
+        JScrollPane resultsPane = new JScrollPane(results);
+
+        return mainPanel;
     }
 
     @Override
@@ -220,52 +229,4 @@ public class BrokenLinksModule implements IModule
         return urlConnection.getResponseCode();
     }
 
-    public static class Link
-    {
-        private String url;
-        private Element context;
-
-        public Link(String url, Element context)
-        {
-            this.url = url;
-            this.context = context;
-        }
-
-        public String getUrl()
-        {
-            return url;
-        }
-
-        public Element getContext()
-        {
-            return context;
-        }
-    }
-
-    public static class BrokenLink
-    {
-        private String page;
-        private String referringContext;
-        private int statusCode;
-        private String referringPage;
-
-        public BrokenLink(String page, String referringContext, String referringPage, int statusCode)
-        {
-            this.page = page;
-            this.referringContext = referringContext;
-            this.referringPage = referringPage;
-            this.statusCode = statusCode;
-        }
-
-        @Override
-        public String toString()
-        {
-            return "BrokenLink{" +
-                    "page='" + page + '\'' +
-                    ", referringContext='" + referringContext + '\'' +
-                    ", referringPage='" + referringPage + '\'' +
-                    ", statusCode=" + statusCode +
-                    '}';
-        }
-    }
 }

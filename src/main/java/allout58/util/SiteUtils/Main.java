@@ -20,9 +20,12 @@ public class Main
         logger.info("Hello world. Here we go!");
         if (args.length == 0)
         {
-            System.out.println("Modules:");
-            for (String n : ModuleManager.getInstance().getAllNames())
-                System.out.println(n);
+            MainForm win = new MainForm();
+            win.pack();
+            win.setVisible(true);
+            //            System.out.println("Modules:");
+            //            for (String n : ModuleManager.getInstance().getAllNames())
+            //                System.out.println(n);
         }
         else
         {

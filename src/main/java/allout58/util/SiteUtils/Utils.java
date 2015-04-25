@@ -14,7 +14,7 @@ public class Utils
     public static String absoluteURL(String referer, String link)
             throws MalformedURLException
     {
-        //String base = referer.substring(0, referer.lastIndexOf("/"));
+        String base = referer.substring(0, referer.lastIndexOf("/") + 1);
         URL url = new URL(new URL(referer), link);
         return url.toExternalForm();
     }
