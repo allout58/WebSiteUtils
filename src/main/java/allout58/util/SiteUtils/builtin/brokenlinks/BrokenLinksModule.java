@@ -51,6 +51,7 @@ public class BrokenLinksModule implements IModule
     private OptionSpec followRedirectOpt;
     private OptionSpec<File> siteMapOutOpt;
     private OptionSpec doImagesOpt;
+    private OptionSpec<File> brokenLinksOutOpt;
 
     @Override
     public JPanel getPanel()
@@ -71,6 +72,7 @@ public class BrokenLinksModule implements IModule
     {
         followRedirectOpt = parser.acceptsAll(Arrays.asList("followRedirect", "r"), "Follow the redirection");
         siteMapOutOpt = parser.acceptsAll(Arrays.asList("siteMapOut", "s"), "Output file for a list of all discovered pages (and images).").withRequiredArg().ofType(File.class);
+        brokenLinksOutOpt = parser.acceptsAll(Arrays.asList("brokenLinksOut", "b"), "Output file for the list of broken links.").withRequiredArg().ofType(File.class).required();
         doImagesOpt = parser.accepts("doImages", "Check images for availability");
     }
 
@@ -92,9 +94,23 @@ public class BrokenLinksModule implements IModule
             beginTraversal(root);
             long timeEnd = System.nanoTime();
             System.out.println();
-            System.out.println("Broken Links:");
-            for (BrokenLink b : brokenLinks)
-                System.out.println(b);
+            try
+            {
+                File out = optionSet.valueOf(brokenLinksOutOpt);
+                if (!out.exists() && !out.createNewFile())
+                    logger.error("Error creating broken links output file.");
+                BufferedWriter bw = new BufferedWriter(new FileWriter(out));
+                for (BrokenLink b : brokenLinks)
+                {
+                    bw.write(b.toString());
+                    bw.newLine();
+                }
+                bw.close();
+            }
+            catch (IOException e)
+            {
+                logger.error("Error writing broken links to file", e);
+            }
 
             if (optionSet.has(siteMapOutOpt))
             {
@@ -102,13 +118,14 @@ public class BrokenLinksModule implements IModule
                 {
                     File out = optionSet.valueOf(siteMapOutOpt);
                     if (!out.exists() && !out.createNewFile())
-                        logger.error("Error creating file.");
+                        logger.error("Error creating site map file.");
                     BufferedWriter bw = new BufferedWriter(new FileWriter(out));
                     for (String map : visitedPages)
                     {
                         bw.write(map);
                         bw.newLine();
                     }
+                    bw.close();
                 }
                 catch (IOException e)
                 {
@@ -117,8 +134,9 @@ public class BrokenLinksModule implements IModule
             }
 
             System.out.println("======Statistics:======");
-            System.out.println(String.format("%-30s:%10d", "Number of Visited Pages", visitedPages.size()));
-            System.out.println(String.format("%-30s:%10.2f", "Total Time", ((double) (timeEnd - timeStart)) / 1000000000.0));
+            System.out.println(String.format("%-25s:%10d", "Number of Visited Pages", visitedPages.size()));
+            System.out.println(String.format("%-25s:%10d", "Number of Broken Links", brokenLinks.size()));
+            System.out.println(String.format("%-25s:%10.2f", "Total Time", ((double) (timeEnd - timeStart)) / 1000000000.0));
         }
         catch (MalformedURLException mue)
         {
