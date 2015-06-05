@@ -14,9 +14,9 @@ public class Utils
     public static String absoluteURL(String referer, String link)
             throws MalformedURLException
     {
-        link = link.replace(" ","%20");
+        String newlink = link.replace(" ", "%20");
         String base = referer.substring(0, referer.lastIndexOf("/") + 1);
-        URL url = new URL(new URL(referer), link);
+        URL url = new URL(new URL(referer), newlink);
         return url.toExternalForm();
     }
 
