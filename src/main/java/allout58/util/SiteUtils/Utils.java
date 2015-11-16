@@ -9,7 +9,7 @@ import java.net.URL;
 public class Utils
 {
     public static final String chromeUA = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36";
-    public static final String[] blockedExtensions = new String[] { ".pdf", ".json", ".jpg", ".gif", ".png", ".doc", ".docx", ".ppt", ".pptx", ".zip" };
+    public static final String[] blockedExtensions = new String[] { ".pdf", ".json", ".jpg", ".jpeg", ".gif", ".png", ".doc", ".docx", ".ppt", ".pptx", ".zip" };
 
     public static String absoluteURL(String referer, String link)
             throws MalformedURLException
